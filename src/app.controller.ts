@@ -9,4 +9,13 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get('getEnv')
+  getEnv(): NodeJS.ProcessEnv {
+    return this.appService.getEnv();
+  }
+  @Get('getMemory')
+  getMemory(): NodeJS.MemoryUsage {
+    return this.appService.getMemory();
+  }
 }
