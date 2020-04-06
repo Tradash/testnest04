@@ -1,14 +1,12 @@
-import { doc } from 'prettier';
-
+import * as redisStore from 'cache-manager-redis-store';
 require('dotenv').config();
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import join = doc.builders.join;
+import { CacheModuleOptions } from '@nestjs/common/cache/interfaces/cache-module.interface';
 
 class ConfigService {
+  constructor(private env: { [k: string]: string | undefined }) {}
 
-  constructor(private env: { [k: string]: string | undefined }) { }
-
-  private getValue(key: string, throwOnMissing = true): string {
+  private getValueString(key: string, throwOnMissing = true): string {
     const value = this.env[key];
     if (!value && throwOnMissing) {
       throw new Error(`config error - missing env.${key}`);
@@ -16,10 +14,29 @@ class ConfigService {
 
     return value;
   }
+  private getValueNumber(key: string, throwOnMissing = true): number {
+    const value = Number(this.env[key]);
+    if (!value && throwOnMissing) {
+      throw new Error(`config error - missing env.${key}`);
+    }
 
-  public ensureValues(keys: string[]) {
-    keys.forEach(k => this.getValue(k, true));
-    return this;
+    return value;
+  }
+
+  // public ensureValues(keys: string[]) {
+  //   keys.forEach(k => this.getValueString(k, true));
+
+  //   return this;
+  // }
+
+  public getRedisConfig(): CacheModuleOptions {
+    return {
+      store: redisStore,
+      host: this.getValueString('REDIS_HOST'),
+      port: this.getValueString('REDIS_PORT'),
+      ttl: this.getValueNumber('REDIS_TTL'), // seconds
+      max: this.getValueNumber('REDIS_MAX_ITEM'), // maximum number of items in cache
+    };
   }
 
   // public getPort() {
@@ -32,17 +49,18 @@ class ConfigService {
   // }
 
   public getTypeOrmConfig(): TypeOrmModuleOptions {
-    const  ssss =
-     {
+    const ssss = {
       type: 'postgres',
 
-      host: this.getValue('POSTGRES_HOST'),
-      port: parseInt(this.getValue('POSTGRES_PORT')),
-      username: this.getValue('POSTGRES_USER'),
-      password: this.getValue('POSTGRES_PASSWORD'),
-      database: this.getValue('POSTGRES_DATABASE'),
+      host: this.getValueString('POSTGRES_HOST'),
+      port: parseInt(this.getValueString('POSTGRES_PORT')),
+      username: this.getValueString('POSTGRES_USER'),
+      password: this.getValueString('POSTGRES_PASSWORD'),
+      database: this.getValueString('POSTGRES_DATABASE'),
 
-      entities: ['dist/**/*.entity.js']
+      entities: ['dist/**/*.entity.js'],
+      logging: true,
+
 
       // migrationsTableName: 'migration',
       //
@@ -57,16 +75,8 @@ class ConfigService {
     console.log(ssss, __dirname, __filename);
     return ssss as TypeOrmModuleOptions;
   }
-
 }
 // const z=require("../model/db.entity")
-const configService = new ConfigService(process.env)
-  .ensureValues([
-    'POSTGRES_HOST',
-    'POSTGRES_PORT',
-    'POSTGRES_USER',
-    'POSTGRES_PASSWORD',
-    'POSTGRES_DATABASE'
-  ]);
+const configService = new ConfigService(process.env);
 
 export { configService };

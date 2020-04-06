@@ -8,6 +8,7 @@ import {
 import { Observable } from 'rxjs';
 import { Point } from 'geojson';
 import { DBPoint } from './model/db.entity';
+import { IDoQuery, IGeoPoint } from './interface';
 // import { CHILD_SERVICE } from './dataController/data.constants';
 
 @Injectable()
@@ -27,6 +28,7 @@ export class AppService {
     return 'Hello World!';
   }
   getEnv(): NodeJS.ProcessEnv {
+    console.log('Делаю сервис');
     return process.env;
   }
   getMemory(): NodeJS.MemoryUsage {
@@ -46,5 +48,25 @@ export class AppService {
   getAllPoint(): Observable<DBPoint[]> {
     const pattern = { cmd: `getAllPoint` };
     return this.client.send<DBPoint[]>(pattern, {});
+  }
+
+  addPoint(data: IGeoPoint): Observable<any> {
+    const pattern = { cmd: `addPoint` };
+    return this.client.send(pattern, data);
+  }
+
+  editPoint(data: IGeoPoint): Observable<any> {
+    const pattern = { cmd: `editPoint` };
+    return this.client.send(pattern, data);
+  }
+
+  deletePoint(data: number): Observable<any> {
+    const pattern = { cmd: 'deletePoint' };
+    return this.client.send(pattern, data);
+  }
+
+  doQuery(data: IDoQuery): Observable<any> {
+    const pattern = { cmd: 'doQuery' };
+    return this.client.send(pattern, data);
   }
 }

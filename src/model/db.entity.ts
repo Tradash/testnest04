@@ -10,4 +10,7 @@ export class DBPoint {
 
   @Column({ type: 'geometry' })
   geog: Point;
+
+  @Column({ type: 'varchar', length: 50 })
+  namePoint: string;
 }
