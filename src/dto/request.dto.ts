@@ -9,7 +9,7 @@ export class PostPoint {
   lat: number;
 }
 
-export class PutPoint extends PostPoint{
+export class PutPoint extends PostPoint {
   @IsNumber()
   gid: number;
 }
@@ -20,5 +20,10 @@ export class GetDoQuery {
   @IsNumberString()
   lat: string;
   @IsNumberString()
-  distance: string
+  distance: string;
+}
+
+export class GetPoint {
+  @IsNumberString()
+  id: string;
 }

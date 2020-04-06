@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 
 import { configService } from './config/configuration';
@@ -11,6 +12,16 @@ async function bootstrap() {
     transport: Transport.NATS,
     options: { url: configService.getNatsConfig() },
   });
+
+  const options = new DocumentBuilder()
+    .setTitle('Тестовое задание')
+    .setDescription('Тестовое задание на стеке Nestjs')
+    .setVersion('1.0')
+    // .addTag('TestTask')
+    .build();
+  const document = SwaggerModule.createDocument(app, options);
+  SwaggerModule.setup('api', app, document);
+
   app.useGlobalPipes(new ValidationPipe());
   await app.startAllMicroservicesAsync();
   await app.listen(process.env.PORT || 3000);

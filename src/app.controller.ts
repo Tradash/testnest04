@@ -1,8 +1,6 @@
 import {
   Body,
   CacheInterceptor,
-  CacheKey,
-  CacheTTL,
   Controller,
   Delete,
   Get,
@@ -12,64 +10,84 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { Observable } from 'rxjs';
-import { PostPoint, PutPoint, GetDoQuery } from './dto/request.dto';
+import { PostPoint, PutPoint, GetDoQuery, GetPoint } from './dto/request.dto';
+import { IUniversalString } from './classes';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  /** Для попингуя
-   *
-   */
   @Get()
+  @ApiOperation({
+    description: 'Метод для попенгуя',
+    summary: 'Возвращает текстовую строку',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ответ сервиса',
+  })
   getHello(): string {
     return this.appService.getHello();
   }
 
-  /** Получить перечень переменных окружения
-   *
-   */
   @UseInterceptors(CacheInterceptor)
   @Get('getEnv')
-  // @CacheKey('getEnv')
-  // @CacheTTL(60)
+  @ApiOperation({
+    description: 'Получить перечень переменных окружения',
+    summary: 'Возвращает перечень активных переменных окружения',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ответ сервиса',
+  })
   getEnv(): NodeJS.ProcessEnv {
     return this.appService.getEnv();
   }
 
-  /** Утилизация памяти приложением
-   *
-   */
   @Get('getMemory')
+  @ApiOperation({
+    description: 'Получить информацуию о использовании памяти приложением',
+    summary: 'Возвращает значение объема используемой памяти',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ответ сервиса',
+  })
   getMemory(): NodeJS.MemoryUsage {
     return this.appService.getMemory();
   }
-
-  /** Отправка микросервису тестового сообщения
-   *
-   */
-  @Get('sendM')
-  sendMessage(): Observable<number> {
-    return this.appService.sendMessageSum();
-  }
-
-  /** Получить перечень всех точек в БД
-   *
-   */
+  @ApiOperation({
+    description: 'Запрос на получение информации о всех точках в БД',
+    summary: 'Возвращает массив точек',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ответ сервиса',
+  })
   @Get('AllPoint')
   getAllPoint() {
     return this.appService.getAllPoint();
-    // return 'Вернуть все точки';
   }
 
   /** Получить точку с указанным gid
    *
    */
   @Get('point/:id')
-  getPoint() {
-    return 'Вернуть указанную точку';
+  @ApiParam({ name: 'id', type: 'number' })
+  @ApiOperation({
+    description: 'Получить точку с указанным gid',
+    summary: 'Возвращает точку с указанным gid',
+
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ответ сервиса',
+  })
+  getPoint(@Param() data: GetPoint) {
+    return this.appService.getPoint(data);
   }
 
   /** Добавить точку в БД
@@ -111,9 +129,9 @@ export class AppController {
   @Get('doQuery')
   doQuery(@Query() query: GetDoQuery) {
     return this.appService.doQuery({
-      distance:Number(query.distance),
-      lat:Number(query.lat),
-      lng:Number(query.lng)
-    })
+      distance: Number(query.distance),
+      lat: Number(query.lat),
+      lng: Number(query.lng),
+    });
   }
 }

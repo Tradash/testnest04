@@ -10,6 +10,7 @@ import { Point } from 'geojson';
 import { DBPoint } from './model/db.entity';
 import { IDoQuery, IGeoPoint } from './interface';
 import { configService } from './config/configuration';
+import { GetPoint } from './dto/request.dto';
 // import { CHILD_SERVICE } from './dataController/data.constants';
 
 @Injectable()
@@ -37,15 +38,14 @@ export class AppService {
     return z;
   }
 
-  sendMessageSum(): Observable<number> {
-    const pattern = { cmd: 'sum' };
-    const data = [1, 2, 3, 4, 5];
-    return this.client.send<number>(pattern, data);
-  }
-
   getAllPoint(): Observable<DBPoint[]> {
     const pattern = { cmd: `getAllPoint` };
     return this.client.send<DBPoint[]>(pattern, {});
+  }
+
+  getPoint(data: GetPoint) {
+    const pattern = { cmd: 'getPoint' };
+    return this.client.send(pattern, data) ;
   }
 
   addPoint(data: IGeoPoint): Observable<any> {

@@ -15,6 +15,10 @@ export class DataService {
     return await this.repo.find();
   }
 
+  async getPoint(id: number): Promise<DBPoint> {
+    return (await this.repo.findOne({ gid: id })) || ({} as DBPoint);
+  }
+
   async addPoint(data: IGeoPoint) {
     return await this.repo.save({
       namePoint: data.name,

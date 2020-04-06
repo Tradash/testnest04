@@ -8,14 +8,15 @@ import { IDoQuery, IGeoPoint } from '../interface';
 export class DataController {
   // constructor() {}
   constructor(private readonly dataService: DataService) {}
-  @MessagePattern({ cmd: 'sum' })
-  sum(data: number[]): number {
-    return (data || []).reduce((a, b) => a + b);
-  }
 
   @MessagePattern({ cmd: 'getAllPoint' })
   async getAllPoint(): Promise<DBPoint[]> {
     return await this.dataService.getAllPoint();
+  }
+
+  @MessagePattern({ cmd: 'getPoint' })
+  async getPoint(id: { id: number }): Promise<DBPoint> {
+    return await this.dataService.getPoint(id.id);
   }
 
   @MessagePattern({ cmd: 'addPoint' })
