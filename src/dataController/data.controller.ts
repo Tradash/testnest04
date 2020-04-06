@@ -33,7 +33,7 @@ export class DataController {
   }
 
   @MessagePattern({ cmd: 'doQuery' })
-  async doQuery(data: IDoQuery): Promise<any> {
+  async doQuery(data: IDoQuery): Promise<Partial<DBPoint>[]> {
     return await this.dataService.doQuery(data);
   }
 }

@@ -35,18 +35,18 @@ export class DataService {
       gid: data,
     });
   }
-  async doQuery(data: IDoQuery) {
-    const param1 = `SRID=4326;POINT(${data.lat} ${data.lng})`;
-    const query = `SELECT "namePoint", "geog", ST_Distance(
-               "geog",
-               ST_GeomFromEWKT('${param1}')
-             ) FROM myfirstdb
-    where ST_Distance(
-               "geog",
-               ST_GeomFromEWKT('${param1}')
-             )<${data.distance}`;
-
-    console.log(data);
-    return await this.repo.query(query );
+  async doQuery(data: IDoQuery): Promise<Partial<DBPoint>[]> {
+    const param1 = JSON.stringify({
+      type: 'Point',
+      coordinates: [data.lat, data.lng],
+    });
+    return await this.repo
+      .createQueryBuilder()
+      .select()
+      .where(`ST_Distance("geog", ST_GeomFromGeoJSON(:id1)::geometry)<:id2`, {
+        id1: param1,
+        id2: data.distance,
+      })
+      .getMany();
   }
 }

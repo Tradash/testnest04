@@ -2,6 +2,7 @@ import * as redisStore from 'cache-manager-redis-store';
 require('dotenv').config();
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { CacheModuleOptions } from '@nestjs/common/cache/interfaces/cache-module.interface';
+import { NatsOptions } from '@nestjs/microservices';
 
 class ConfigService {
   constructor(private env: { [k: string]: string | undefined }) {}
@@ -48,6 +49,12 @@ class ConfigService {
   //   return mode != 'DEV';
   // }
 
+  public getNatsConfig(): string {
+    return `nats://${this.getValueString('NATS_HOST')}:${this.getValueNumber(
+      'NATS_PORT',
+    )}`;
+  }
+
   public getTypeOrmConfig(): TypeOrmModuleOptions {
     const ssss = {
       type: 'postgres',
@@ -60,7 +67,6 @@ class ConfigService {
 
       entities: ['dist/**/*.entity.js'],
       logging: true,
-
 
       // migrationsTableName: 'migration',
       //

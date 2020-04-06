@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { Point } from 'geojson';
 import { DBPoint } from './model/db.entity';
 import { IDoQuery, IGeoPoint } from './interface';
+import { configService } from './config/configuration';
 // import { CHILD_SERVICE } from './dataController/data.constants';
 
 @Injectable()
@@ -16,11 +17,8 @@ export class AppService {
   client: ClientProxy;
   constructor() {
     this.client = ClientProxyFactory.create({
-      transport: Transport.TCP,
-      options: {
-        host: '127.0.0.1',
-        port: 8877,
-      },
+      transport: Transport.NATS,
+      options: { url: configService.getNatsConfig() },
     });
   }
 
@@ -65,7 +63,7 @@ export class AppService {
     return this.client.send(pattern, data);
   }
 
-  doQuery(data: IDoQuery): Observable<any> {
+  doQuery(data: IDoQuery): Observable<Partial<DBPoint>[]> {
     const pattern = { cmd: 'doQuery' };
     return this.client.send(pattern, data);
   }
