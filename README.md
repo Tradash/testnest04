@@ -1,8 +1,7 @@
 
 ## Описание
 
-Тестовое задание
-текс задания см task.md
+Тестовое задание, текст задания см task.md
 
 Реализовано на Nestjs,<br>
 БД для хранения данных - PostGis <br>
@@ -10,16 +9,16 @@
 Обмен данными между нодами сервиса через NATS<br>
 Описание HTTP API доступно по роуту /api <br>
 
-Для запуска необходимы следующие внешние сервисы:
+Для запуска необходимы следующие доступные внешние сервисы:
 - Сервис с БД PostGis
 - Сервис с БД Redis
 - Сервис обмена сообщений NATS 
 
 ## Установка
 
-$ git clone https://github.com/Tradash/nestjs_test.git
-$ cd nestjs_test
-$ npm install
+$ git clone https://github.com/Tradash/testnest04.git<br>
+$ cd testnest04<br>
+$ npm install<br>
 
 ## Настройка окружения. Установка переменных окружения
 ##### Переменный для Настройки сервиса
@@ -85,7 +84,7 @@ NATS_HOST = localhost
 NATS_PORT = 4222
 ```
 
-Запуск приложения
+## Запуск приложения
 ```bash
 # development
 $ npm run start
