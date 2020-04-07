@@ -1,8 +1,8 @@
 {
   "name": "testtask04",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Тестовое задание по Nest",
+  "author": "Bobkov Alexander",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
