@@ -25,8 +25,7 @@ import { DBPoint } from './model/db.entity';
  *  Роуты для сервиса по приему запросов
  */
 
-@ApiTags('TestTask')
-@Controller('TestTask')
+@Controller()
 export class AppController {
   constructor(
 

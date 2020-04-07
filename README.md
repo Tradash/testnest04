@@ -47,7 +47,7 @@ POSTGRES_PASSWORD=admin
 ```
 POSTGRES_DATABASE=postgis_30_sample
 ```
-- Режима логирования запросов к БД (True)
+- Включение режима вывода запросов к БД в консоль.
 ```
 TYPEORM_LOGGING=false
 ```
