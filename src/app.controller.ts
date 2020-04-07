@@ -10,15 +10,29 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { Observable } from 'rxjs';
-import { PostPoint, PutPoint, GetDoQuery, GetPoint } from './dto/request.dto';
-import { IUniversalString } from './classes';
+import {
+  PostPointDto,
+  PutPointDto,
+  GetDoQueryDto,
+  GetPointDto,
+} from './dto/request.dto';
+import { MsgResponse } from './dto/response.dto';
+import { DBPoint } from './model/db.entity';
 
-@Controller()
+/**
+ *  Роуты для сервиса по приему запросов
+ */
+
+@ApiTags('TestTask')
+@Controller('TestTask')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+
+    private readonly appService: AppService,
+  ) {}
+
 
   @Get()
   @ApiOperation({
@@ -27,7 +41,7 @@ export class AppController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Ответ сервиса',
+    description: 'Сервис доступен',
   })
   getHello(): string {
     return this.appService.getHello();
@@ -39,10 +53,6 @@ export class AppController {
     description: 'Получить перечень переменных окружения',
     summary: 'Возвращает перечень активных переменных окружения',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Ответ сервиса',
-  })
   getEnv(): NodeJS.ProcessEnv {
     return this.appService.getEnv();
   }
@@ -52,13 +62,11 @@ export class AppController {
     description: 'Получить информацуию о использовании памяти приложением',
     summary: 'Возвращает значение объема используемой памяти',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Ответ сервиса',
-  })
   getMemory(): NodeJS.MemoryUsage {
     return this.appService.getMemory();
   }
+
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({
     description: 'Запрос на получение информации о всех точках в БД',
     summary: 'Возвращает массив точек',
@@ -66,50 +74,58 @@ export class AppController {
   @ApiResponse({
     status: 200,
     description: 'Ответ сервиса',
+    type: DBPoint,
+    isArray: true,
   })
   @Get('AllPoint')
-  getAllPoint() {
+  getAllPoint(): Promise<DBPoint[]> {
     return this.appService.getAllPoint();
   }
 
-  /** Получить точку с указанным gid
-   *
-   */
+  @UseInterceptors(CacheInterceptor)
   @Get('point/:id')
   @ApiParam({ name: 'id', type: 'number' })
   @ApiOperation({
     description: 'Получить точку с указанным gid',
     summary: 'Возвращает точку с указанным gid',
-
   })
   @ApiResponse({
     status: 200,
     description: 'Ответ сервиса',
+    type: DBPoint,
   })
-  getPoint(@Param() data: GetPoint) {
-    return this.appService.getPoint(data);
+  getPoint(@Param() getPointDto: GetPointDto): Promise<DBPoint> {
+    return this.appService.getPoint(getPointDto);
   }
 
-  /** Добавить точку в БД
-   *
-   * @param data
-   */
-
   @Post('point')
-  addPoint(@Body() data: PostPoint) {
+  @ApiOperation({
+    description: 'Добавить точку в БД',
+    summary: 'Возвращает добавленную точку',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ответ сервиса',
+    type: DBPoint,
+  })
+  addPoint(@Body() data: PostPointDto): Promise<DBPoint> {
     return this.appService.addPoint({
       name: data.name,
       point: { type: 'Point', coordinates: [data.lng, data.lat] },
     });
   }
 
-  /** Изменить указанную точку
-   *
-   * @param data
-   */
-
   @Put('point')
-  editPoint(@Body() data: PutPoint) {
+  @ApiOperation({
+    description: 'Изменить указанную точку',
+    summary: 'Возвращает измененную точку',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ответ сервиса',
+    type: DBPoint,
+  })
+  editPoint(@Body() data: PutPointDto): Promise<DBPoint> {
     return this.appService.editPoint({
       gid: data.gid,
       name: data.name,
@@ -117,17 +133,33 @@ export class AppController {
     });
   }
 
-  /** Удалить указанную точку
-   *
-   * @param gid
-   */
   @Delete('point/:gid')
-  deletePoint(@Param('gid') gid: number) {
+  @ApiOperation({
+    description: 'Удаление точки по ID',
+    summary: 'Возвращает code:0 в случае успешной операции',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ответ сервиса',
+    type: MsgResponse,
+  })
+  deletePoint(@Param('gid') gid: number): Promise<MsgResponse> {
     return this.appService.deletePoint(gid);
   }
 
+  @UseInterceptors(CacheInterceptor)
   @Get('doQuery')
-  doQuery(@Query() query: GetDoQuery) {
+  @ApiOperation({
+    description: 'Поиск точек в пределах радиуса от указанной точки',
+    summary: 'Возвращает перечень точек',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ответ сервиса',
+    type: DBPoint,
+    isArray: true,
+  })
+  doQuery(@Query() query: GetDoQueryDto): Promise<DBPoint[]> {
     return this.appService.doQuery({
       distance: Number(query.distance),
       lat: Number(query.lat),

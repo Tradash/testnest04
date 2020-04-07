@@ -1,29 +1,38 @@
 import { IsNumber, IsNotEmpty, IsNumberString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class PostPoint {
+export class PostPointDto {
+  @ApiProperty({ example: 'Точка №1', description: 'Имя точки' })
   @IsNotEmpty()
-  name: string;
+  readonly name: string;
+  @ApiProperty({ example: 45.4558, description: 'Широта точки' })
   @IsNumber()
-  lng: number;
+  readonly lng: number;
+  @ApiProperty({ example: 55.4558, description: 'Долгота точки' })
   @IsNumber()
-  lat: number;
+  readonly lat: number;
 }
 
-export class PutPoint extends PostPoint {
+export class PutPointDto extends PostPointDto {
+  @ApiProperty({ example: 101, description: 'ID точки' })
   @IsNumber()
-  gid: number;
+  readonly gid: number;
 }
 
-export class GetDoQuery {
+export class GetDoQueryDto {
   @IsNumberString()
-  lng: string;
+  @ApiProperty({ example: 45.4558, description: 'Широта точки' })
+  readonly lng: string;
   @IsNumberString()
-  lat: string;
+  @ApiProperty({ example: 55.4558, description: 'Долгота точки' })
+  readonly lat: string;
+  @ApiProperty({ example: 120, description: 'Расстояние в метрах'})
   @IsNumberString()
-  distance: string;
+  readonly distance: string;
 }
 
-export class GetPoint {
+export class GetPointDto {
+  @ApiProperty({ example: 101, description: 'ID точки' })
   @IsNumberString()
-  id: string;
+  readonly id: string;
 }

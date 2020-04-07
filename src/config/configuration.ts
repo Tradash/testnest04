@@ -2,11 +2,32 @@ import * as redisStore from 'cache-manager-redis-store';
 require('dotenv').config();
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { CacheModuleOptions } from '@nestjs/common/cache/interfaces/cache-module.interface';
-import { NatsOptions } from '@nestjs/microservices';
+
+/**
+ * Класс для настройки конфигурации приложения
+ */
 
 class ConfigService {
   constructor(private env: { [k: string]: string | undefined }) {}
 
+  /**
+   * Функция для получения строкового занчения из переменной окружения
+   * @param key - имя переменной окружения
+   *
+   */
+  private getValueBoolean(key: string): boolean {
+    const value = this.env[key];
+    if (!value) {
+      return false;
+    }
+    return value.toLowerCase() === 'true';
+  }
+
+  /**
+   * Функция для получения строкового занчения из переменной окружения
+   * @param key - имя переменной окружения
+   * @param throwOnMissing
+   */
   private getValueString(key: string, throwOnMissing = true): string {
     const value = this.env[key];
     if (!value && throwOnMissing) {
@@ -15,6 +36,12 @@ class ConfigService {
 
     return value;
   }
+
+  /**
+   * Функция для получения числового занчения из переменной окружения
+   * @param key - имя переменной окружения
+   * @param throwOnMissing
+   */
   private getValueNumber(key: string, throwOnMissing = true): number {
     const value = Number(this.env[key]);
     if (!value && throwOnMissing) {
@@ -24,11 +51,9 @@ class ConfigService {
     return value;
   }
 
-  // public ensureValues(keys: string[]) {
-  //   keys.forEach(k => this.getValueString(k, true));
-
-  //   return this;
-  // }
+  /**
+   * Параметры для кэширующего Redis
+   */
 
   public getRedisConfig(): CacheModuleOptions {
     return {
@@ -40,14 +65,9 @@ class ConfigService {
     };
   }
 
-  // public getPort() {
-  //   return this.getValue('PORT', true);
-  // }
-  //
-  // public isProduction() {
-  //   const mode = this.getValue('MODE', false);
-  //   return mode != 'DEV';
-  // }
+  /**
+   * Параметры для Nats
+   */
 
   public getNatsConfig(): string {
     return `nats://${this.getValueString('NATS_HOST')}:${this.getValueNumber(
@@ -55,34 +75,25 @@ class ConfigService {
     )}`;
   }
 
-  public getTypeOrmConfig(): TypeOrmModuleOptions {
-    const ssss = {
-      type: 'postgres',
+  /**
+   * Параметры для postgres
+   */
 
+  public getTypeOrmConfig(): TypeOrmModuleOptions {
+    return {
+      type: 'postgres',
       host: this.getValueString('POSTGRES_HOST'),
       port: parseInt(this.getValueString('POSTGRES_PORT')),
       username: this.getValueString('POSTGRES_USER'),
       password: this.getValueString('POSTGRES_PASSWORD'),
       database: this.getValueString('POSTGRES_DATABASE'),
-
       entities: ['dist/**/*.entity.js'],
-      logging: true,
-
-      // migrationsTableName: 'migration',
-      //
-      // migrations: ['src/migration/*.ts'],
-      //
-      // cli: {
-      //   migrationsDir: 'src/migration',
-      // },
-
-      // ssl: this.isProduction(),
+      logging: this.getValueBoolean('TYPEORM_LOGGING'),
+      synchronize: this.getValueBoolean('CREATE_NEWTABLE'),
     };
-    console.log(ssss, __dirname, __filename);
-    return ssss as TypeOrmModuleOptions;
   }
 }
-// const z=require("../model/db.entity")
+
 const configService = new ConfigService(process.env);
 
 export { configService };

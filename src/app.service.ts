@@ -1,17 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
-// import { MAIN_SERVICE } from './app.constants';
+import { Injectable } from '@nestjs/common';
 import {
   ClientProxy,
   ClientProxyFactory,
   Transport,
 } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
-import { Point } from 'geojson';
 import { DBPoint } from './model/db.entity';
 import { IDoQuery, IGeoPoint } from './interface';
 import { configService } from './config/configuration';
-import { GetPoint } from './dto/request.dto';
-// import { CHILD_SERVICE } from './dataController/data.constants';
+import { GetPointDto } from './dto/request.dto';
+import { MsgResponse } from './dto/response.dto';
 
 @Injectable()
 export class AppService {
@@ -23,13 +20,26 @@ export class AppService {
     });
   }
 
+  /**
+   * Сообщение для поппингуя
+   */
+
   getHello(): string {
     return 'Hello World!';
   }
+
+  /**
+   * Получение списка переменных окружения
+   */
   getEnv(): NodeJS.ProcessEnv {
     console.log('Делаю сервис');
     return process.env;
   }
+
+  /**
+   * Утилизация памяти
+   */
+
   getMemory(): NodeJS.MemoryUsage {
     const z = process.memoryUsage();
     Object.keys(z).map(x => {
@@ -38,33 +48,59 @@ export class AppService {
     return z;
   }
 
-  getAllPoint(): Observable<DBPoint[]> {
+  /**
+   *  Получить все точки из БД
+   */
+  async getAllPoint(): Promise<DBPoint[]> {
     const pattern = { cmd: `getAllPoint` };
-    return this.client.send<DBPoint[]>(pattern, {});
+    return await this.client.send<DBPoint[]>(pattern, {}).toPromise();
   }
 
-  getPoint(data: GetPoint) {
+  /**
+   * Получить точку по ID
+   * @param data - JSON c ID искомой точки
+   */
+
+  async getPoint(data: GetPointDto): Promise<DBPoint> {
     const pattern = { cmd: 'getPoint' };
-    return this.client.send(pattern, data) ;
+    return this.client.send<DBPoint>(pattern, data).toPromise();
   }
 
-  addPoint(data: IGeoPoint): Observable<any> {
+  /**
+   * Добавить точку в БД
+   * @param data - JSON с данными о добавляемой точке
+   */
+
+  async addPoint(data: IGeoPoint): Promise<DBPoint> {
     const pattern = { cmd: `addPoint` };
-    return this.client.send(pattern, data);
+    return await this.client.send<DBPoint>(pattern, data).toPromise();
   }
 
-  editPoint(data: IGeoPoint): Observable<any> {
+  /**
+   * Отредактировать точку в БД
+   * @param data - JSON с новыми данными для точки
+   */
+  editPoint(data: IGeoPoint): Promise<DBPoint> {
     const pattern = { cmd: `editPoint` };
-    return this.client.send(pattern, data);
+    return this.client.send(pattern, data).toPromise();
   }
 
-  deletePoint(data: number): Observable<any> {
+  /**
+   * Удалить точку
+   * @param data - ID точки подлежащей удалению
+   */
+  deletePoint(data: number): Promise<MsgResponse> {
     const pattern = { cmd: 'deletePoint' };
-    return this.client.send(pattern, data);
+    return this.client.send(pattern, data).toPromise();
   }
 
-  doQuery(data: IDoQuery): Observable<Partial<DBPoint>[]> {
+  /**
+   * Выполнить запрос на поиск точек
+   * @param data - JSON c параметрами запроса
+   */
+
+  doQuery(data: IDoQuery): Promise<DBPoint[]> {
     const pattern = { cmd: 'doQuery' };
-    return this.client.send(pattern, data);
+    return this.client.send(pattern, data).toPromise();
   }
 }
